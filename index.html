@@ -276,6 +276,681 @@
             align-items: center;
             margin-bottom: 20px;
             position: relative;
+            cursor: pointer;
+        }
+
+        .img-card img, .img-card svg {
+            width: 100%;
+            height: auto;
+            max-height: 60vh;
+            object-fit: contain;
+            user-select: none;
+            -webkit-user-drag: none;
+            display: block;
+        }
+
+        /* Polaroid Frame Style specifically for Screen 4 */
+        .frame-style img, .frame-style svg {
+            border: 15px solid #eae6e3;
+            border-bottom: 50px solid #eae6e3;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45), 
+                        0 5px 15px rgba(0, 0, 0, 0.25);
+            border-radius: 4px;
+            transform: rotate(-1.5deg);
+            transition: transform 0.4s ease;
+            background: #eae6e3;
+        }
+
+        .frame-style img:hover, .frame-style svg:hover {
+            transform: rotate(0deg) scale(1.03);
+        }
+
+        /* Screen-specific backgrounds */
+        #screen4 {
+            background-color: var(--card-gray); /* Blank screen #6D6968 */
+        }
+        #screen4 .tap-prompt {
+            color: #ffffff;
+        }
+
+        #screen5 {
+            background-color: #ffffff; /* Blank white background */
+        }
+        #screen5 .tap-prompt {
+            color: #333333;
+        }
+
+        #screen6 {
+            background-color: #ffffff; /* Blank background */
+        }
+        #screen6 .tap-prompt {
+            color: #333333;
+        }
+
+        /* --- SCREEN 6: RESTART BTN --- */
+        .restart-button {
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+            padding: 16px 36px;
+            font-family: inherit;
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: var(--pink);
+            color: #ffffff;
+            border: 3px solid var(--blue);
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(255, 113, 206, 0.4), 
+                        0 0 0 4px rgba(1, 205, 254, 0.2);
+            transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1),
+                        transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                        background 0.3s ease,
+                        border-color 0.3s ease,
+                        box-shadow 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .restart-button.visible {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        .restart-button:hover {
+            transform: translateY(-4px) scale(1.03);
+            background: var(--blue);
+            border-color: var(--pink);
+            box-shadow: 0 10px 25px rgba(1, 205, 254, 0.5), 
+                        0 0 0 6px rgba(255, 113, 206, 0.2);
+        }
+
+        .restart-button:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        /* --- PARTY CONFETTI CANVAS --- */
+        #celebration-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 99;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient glowing visual decorations -->
+    <div class="ambient-glow" style="top: 10%; left: 10%;"></div>
+    <div class="ambient-glow" style="bottom: 15%; right: 10%; background: radial-gradient(circle, rgba(1, 205, 254, 0.15) 0%, rgba(255, 113, 206, 0) 70%);"></div>
+
+    <!-- Celebration Canvas -->
+    <canvas id="celebration-canvas"></canvas>
+
+    <div class="wrapper">
+        
+        <!-- SCREEN 1 -->
+        <div class="screen active" id="screen1">
+            <h1 class="question-text">WHO IS YOUR FAVORITE PERSON?</h1>
+            <div class="status-message" id="status-text"></div>
+            <div class="input-display" id="display-value"></div>
+            
+            <div class="numpad-grid">
+                <button class="key-btn color-p" onclick="appendKey('1')">1</button>
+                <button class="key-btn color-b" onclick="appendKey('2')">2</button>
+                <button class="key-btn color-g" onclick="appendKey('3')">3</button>
+                
+                <button class="key-btn color-v" onclick="appendKey('4')">4</button>
+                <button class="key-btn color-p" onclick="appendKey('5')">5</button>
+                <button class="key-btn color-b" onclick="appendKey('6')">6</button>
+                
+                <button class="key-btn color-g" onclick="appendKey('7')">7</button>
+                <button class="key-btn color-v" onclick="appendKey('8')">8</button>
+                <button class="key-btn color-p" onclick="appendKey('9')">9</button>
+                
+                <button class="key-btn color-b action" onclick="clearKeys()">CLEAR</button>
+                <button class="key-btn color-g" onclick="appendKey('0')">0</button>
+                <button class="key-btn color-v action" onclick="checkCode()">OK</button>
+            </div>
+        </div>
+
+        <!-- SCREEN 2 -->
+        <div class="screen" id="screen2" onclick="progressFrom(2)">
+            <div class="story-layout">
+                <p class="story-text">I don't know how i would have fared if you weren't as awesome as you are but it definitely wouldn't have been well.</p>
+            </div>
+            <div class="tap-prompt" id="prompt-s2">Tap To Continue</div>
+        </div>
+
+        <!-- SCREEN 3 -->
+        <div class="screen" id="screen3" onclick="progressFrom(3)">
+            <div class="story-layout">
+                <p class="story-text">there are no words to express the bond we have and I wouldn't try to to tone it down just to fit it to words</p>
+            </div>
+            <div class="tap-prompt" id="prompt-s3">Tap To Continue</div>
+        </div>
+
+        <!-- SCREEN 4: Framed centered image -->
+        <div class="screen" id="screen4" onclick="progressFrom(4)">
+            <div class="img-card frame-style" id="img-card-1">
+                <!-- Image 1 -->
+                <img src="5870e67634d4ade331399fdc7d175ab6.png" alt="You are the Coo-est Pigeon" onerror="fallbackSVG(1, this)">
+            </div>
+            <div class="tap-prompt" id="prompt-s4">Tap To Continue</div>
+        </div>
+
+        <!-- SCREEN 5: White background center image -->
+        <div class="screen" id="screen5" onclick="progressFrom(5)">
+            <div class="img-card" id="img-card-2">
+                <!-- Image 2 -->
+                <img src="60c1746d1cad466e10f01e993173737c.png" alt="Hap-pea Father's Day" onerror="fallbackSVG(2, this)">
+            </div>
+            <div class="tap-prompt" id="prompt-s5">Tap To Continue</div>
+        </div>
+
+        <!-- SCREEN 6: Final screen center image & Tap to reveal Restart button -->
+        <div class="screen" id="screen6" onclick="revealRestart()">
+            <div class="img-card" id="img-card-3">
+                <!-- Image 3 -->
+                <img src="ce395025b68da3cdbcbc7511a815a7c8.png" alt="Love you from head to tomatoes" onerror="fallbackSVG(3, this)">
+            </div>
+            <button class="restart-button" id="restart-btn-el" onclick="reloadApp(event)">Restart</button>
+            <div class="tap-prompt" id="prompt-s6">Tap To Finish</div>
+        </div>
+
+    </div>
+
+    <script>
+        let enteredSequence = "";
+        const correctCode = "50";
+        let activeScreen = 1;
+
+        // Custom High-Quality SVG Fallbacks if files are missing locally during testing
+        const fallbacks = {
+            1: `<svg viewBox="0 0 400 450" xmlns="http://www.w3.org/2000/svg" style="background:#ffffff; border-radius:4px;">
+                    <rect width="100%" height="100%" fill="#e6f2ff"/>
+                    <circle cx="200" cy="180" r="70" fill="#a3b8cc"/>
+                    <ellipse cx="200" cy="260" r="90" rx="95" fill="#b3cbd6"/>
+                    <circle cx="175" cy="160" r="12" fill="#000000"/>
+                    <circle cx="178" cy="157" r="4" fill="#ffffff"/>
+                    <polygon points="150,140 200,150 170,175" fill="#333333"/>
+                    <polygon points="195,175 210,185 195,195" fill="#ffaa00"/>
+                    <rect x="180" y="210" width="40" height="10" rx="5" fill="#ff71ce"/>
+                    <text x="200" y="380" font-family="'Fredoka', sans-serif" font-weight="bold" font-size="24" fill="#333333" text-anchor="middle">You are THE COO-EST.</text>
+                </svg>`,
+            2: `<svg viewBox="0 0 400 450" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="200" cy="200" rx="60" ry="140" fill="#4caf50" stroke="#2e7d32" stroke-width="6"/>
+                    <circle cx="200" cy="110" r="25" fill="#81c784"/>
+                    <circle cx="200" cy="200" r="25" fill="#81c784"/>
+                    <circle cx="200" cy="290" r="25" fill="#81c784"/>
+                    <!-- Mustache -->
+                    <path d="M 180 120 C 180 110, 195 110, 200 118 C 205 110, 220 110, 220 120 C 215 125, 205 120, 200 125 C 195 120, 185 125, 180 120 Z" fill="#1b5e20"/>
+                    <text x="200" y="390" font-family="'Fredoka', sans-serif" font-weight="bold" font-size="28" fill="#2e7d32" text-anchor="middle">HAP-PEA</text>
+                    <text x="200" y="425" font-family="'Fredoka', sans-serif" font-weight="bold" font-size="28" fill="#333333" text-anchor="middle">FATHER'S DAY</text>
+                </svg>`,
+            3: `<svg viewBox="0 0 400 450" xmlns="http://www.w3.org/2000/svg">
+                    <text x="200" y="60" font-family="'Fredoka', sans-serif" font-weight="bold" font-size="28" fill="#5d4037" text-anchor="middle">I LOVE YOU</text>
+                    <text x="200" y="95" font-family="'Fredoka', sans-serif" font-weight="bold" font-size="24" fill="#5d4037" text-anchor="middle">FROM MY HEAD</text>
+                    <!-- Tomato Body -->
+                    <ellipse cx="200" cy="240" rx="120" ry="100" fill="#ff5252" stroke="#d32f2f" stroke-width="6"/>
+                    <!-- Leaf Stem -->
+                    <path d="M 200 140 L 200 110 M 200 140 L 170 125 M 200 140 L 230 125 M 200 140 L 185 155 M 200 140 L 215 155" stroke="#388e3c" stroke-width="8" stroke-linecap="round"/>
+                    <!-- Smile -->
+                    <path d="M 180 250 Q 200 275 220 250" stroke="#333" stroke-width="5" fill="none" stroke-linecap="round"/>
+                    <circle cx="160" cy="230" r="8" fill="#333"/>
+                    <circle cx="240" cy="230" r="8" fill="#333"/>
+                    <circle cx="145" cy="245" r="10" fill="#ff8a80" opacity="0.6"/>
+                    <circle cx="255" cy="245" r="10" fill="#ff8a80" opacity="0.6"/>
+                    <text x="200" y="390" font-family="'Fredoka', sans-serif" font-weight="bold" font-size="34" fill="#5d4037" text-anchor="middle">TO-MA-TOES</text>
+                </svg>`
+        };
+
+        function fallbackSVG(index, element) {
+            const card = document.getElementById(`img-card-${index}`);
+            if (card) {
+                card.innerHTML = fallbacks[index];
+            }
+        }
+
+        // Handles numpad key input
+        function appendKey(val) {
+            if (enteredSequence.length < 8) {
+                enteredSequence += val;
+                updateDisplay();
+            }
+        }
+
+        // Clears current passcode display
+        function clearKeys() {
+            enteredSequence = "";
+            updateDisplay();
+            document.getElementById('status-text').innerText = "";
+            document.getElementById('status-text').classList.remove('error');
+        }
+
+        // Updates display state & style variables
+        function updateDisplay() {
+            const display = document.getElementById('display-value');
+            display.innerText = enteredSequence;
+            if (enteredSequence.length > 0) {
+                display.classList.add('has-value');
+            } else {
+                display.classList.remove('has-value');
+            }
+        }
+
+        // Validate code entry
+        function checkCode() {
+            const screen1 = document.getElementById('screen1');
+            const statusText = document.getElementById('status-text');
+
+            if (enteredSequence === correctCode) {
+                statusText.innerText = "";
+                statusText.classList.remove('error');
+                
+                // High-fidelity zoom transition
+                screen1.classList.add('zoom-exit');
+                triggerBurstConfetti();
+                
+                setTimeout(() => {
+                    screen1.classList.remove('active', 'zoom-exit');
+                    advanceToScreen(2);
+                }, 750);
+            } else {
+                // Incorrect path sequence
+                statusText.innerText = "Try again";
+                statusText.classList.add('error');
+                
+                // Trigger quick vibration if hardware supports it
+                if (navigator.vibrate) {
+                    navigator.vibrate(150);
+                }
+
+                // Shake input container
+                const display = document.getElementById('display-value');
+                display.classList.add('shake');
+                
+                setTimeout(() => {
+                    display.classList.remove('shake');
+                    clearKeys();
+                }, 400);
+            }
+        }
+
+        // Screen logic manager
+        function advanceToScreen(screenNum) {
+            activeScreen = screenNum;
+            
+            // Background update handlers as specified:
+            if (screenNum === 2 || screenNum === 3) {
+                document.body.style.backgroundColor = "var(--dark)";
+            } else if (screenNum === 4) {
+                document.body.style.backgroundColor = "var(--card-gray)"; // Blank screen #6D6968
+            } else if (screenNum === 5) {
+                document.body.style.backgroundColor = "#ffffff"; // Blank white background
+            } else if (screenNum === 6) {
+                document.body.style.backgroundColor = "#ffffff"; // Blank background
+            }
+
+            // Clean active screens
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            
+            // Show new active screen
+            const currentEl = document.getElementById(`screen${screenNum}`);
+            if (currentEl) {
+                currentEl.classList.add('active');
+                
+                // Set delayed tap-to-continue prompts (1s delay)
+                const prompt = document.getElementById(`prompt-s${screenNum}`);
+                if (prompt) {
+                    prompt.classList.remove('visible');
+                    setTimeout(() => {
+                        if (activeScreen === screenNum) { // Safety guard
+                            prompt.classList.add('visible');
+                        }
+                    }, 1000);
+                }
+            }
+        }
+
+        // Action when screen body tapped
+        function progressFrom(screenId) {
+            advanceToScreen(screenId + 1);
+        }
+
+        // Action specifically for the final screen (Screen 6) to reveal the restart button
+        function revealRestart() {
+            const btn = document.getElementById('restart-btn-el');
+            const prompt = document.getElementById('prompt-s6');
+            if (btn && !btn.classList.contains('visible')) {
+                btn.classList.add('visible');
+                triggerBurstConfetti(); // Celebrate finishing!
+                if (prompt) {
+                    prompt.classList.remove('visible'); // Remove hint once completed
+                }
+            }
+        }
+
+        // Reload the webpage to restart the interactive experience
+        function reloadApp(event) {
+            event.stopPropagation(); // Prevent trigger from firing parent screen onclick
+            window.location.reload();
+        }
+
+        /* --- PREMIUM ZERO-DEPENDENCY CANVAS CONFETTI --- */
+        const canvas = document.getElementById('celebration-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let animationId = null;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function triggerBurstConfetti() {
+            particles = [];
+            const palette = ['#ff71ce', '#01cdfe', '#05ffa1', '#b967ff', '#fffb96'];
+            
+            // Create a premium burst effect from bottom left and bottom right corners
+            for (let i = 0; i < 75; i++) {
+                // Left launcher
+                particles.push(createParticle(0, canvas.height, 45, palette));
+                // Right launcher
+                particles.push(createParticle(canvas.width, canvas.height, 135, palette));
+            }
+
+            if (!animationId) {
+                renderConfetti();
+            }
+        }
+
+        function createParticle(x, y, angleDeg, colors) {
+            const velocity = Math.random() * 15 + 15;
+            const angleRad = (angleDeg + (Math.random() * 40 - 20)) * Math.PI / 180;
+            
+            return {
+                x: x,
+                y: y,
+                vx: Math.cos(angleRad) * velocity,
+                vy: -Math.sin(angleRad) * velocity,
+                gravity: 0.38,
+                drag: 0.96,
+                rotation: Math.random() * 360,
+                rSpeed: Math.random() * 10 - 5,
+                size: Math.random() * 8 + 6,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                shape: Math.random() > 0.4 ? 'rect' : 'circle',
+                life: 1.0,
+                decay: Math.random() * 0.015 + 0.01
+            };
+        }
+
+        function renderConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.vy += p.gravity;
+                p.vx *= p.drag;
+                p.vy *= p.drag;
+                p.x += p.vx;
+                p.y += p.vy;
+                p.rotation += p.rSpeed;
+                p.life -= p.decay;
+
+                if (p.life <= 0 || p.y > canvas.height + 20) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.rotation * Math.PI / 180);
+                ctx.globalAlpha = p.life;
+                ctx.fillStyle = p.color;
+
+                if (p.shape === 'rect') {
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 1.5);
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            if (particles.length > 0) {
+                animationId = requestAnimationFrame(renderConfetti);
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+        }
+    </script>
+</body>
+</html>
+
+```
+            z-index: 2;
+        }
+
+        /* Screens Base Rules */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.95);
+            transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), 
+                        transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .screen.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+        }
+
+        /* Screen 1 Zoom Out Success Animation */
+        .screen.zoom-exit {
+            opacity: 0;
+            transform: scale(2.5);
+            filter: blur(4px);
+            pointer-events: none;
+        }
+
+        /* --- SCREEN 1: THE NEON NUMPAD --- */
+        #screen1 {
+            background-color: var(--dark);
+        }
+
+        .question-text {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--pink);
+            text-shadow: 0 0 10px rgba(255, 113, 206, 0.6),
+                         0 0 20px rgba(1, 205, 254, 0.4);
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+            max-width: 480px;
+            line-height: 1.25;
+            animation: textPulse 2s infinite alternate;
+        }
+
+        @keyframes textPulse {
+            0% { text-shadow: 0 0 8px rgba(255, 113, 206, 0.5), 0 0 15px rgba(1, 205, 254, 0.3); }
+            100% { text-shadow: 0 0 16px rgba(255, 113, 206, 0.8), 0 0 30px rgba(1, 205, 254, 0.6); }
+        }
+
+        .status-message {
+            height: 28px;
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--blue);
+            text-shadow: 0 0 8px rgba(1, 254, 254, 0.5);
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .status-message.error {
+            color: #ff4a5a;
+            text-shadow: 0 0 12px rgba(255, 74, 90, 0.7);
+            animation: shake 0.3s ease-in-out;
+        }
+
+        .input-display {
+            width: 240px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 3px solid var(--blue);
+            border-radius: 18px;
+            box-shadow: 0 0 20px rgba(1, 205, 254, 0.25), inset 0 0 10px rgba(1, 205, 254, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.2rem;
+            color: #ffffff;
+            font-weight: 700;
+            margin-bottom: 24px;
+            letter-spacing: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .input-display.has-value {
+            border-color: var(--pink);
+            box-shadow: 0 0 20px rgba(255, 113, 206, 0.4);
+        }
+
+        .numpad-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            width: 280px;
+            max-width: 100%;
+        }
+
+        .key-btn {
+            aspect-ratio: 1;
+            height: 72px;
+            width: 72px;
+            border-radius: 50%;
+            border: none;
+            font-family: inherit;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #ffffff;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.1s, filter 0.2s, box-shadow 0.2s;
+            margin: auto;
+        }
+
+        .key-btn:active {
+            transform: scale(0.9);
+        }
+
+        .key-btn.color-p { background-color: var(--pink); box-shadow: 0 4px 14px rgba(255, 113, 206, 0.4); }
+        .key-btn.color-b { background-color: var(--blue); box-shadow: 0 4px 14px rgba(1, 205, 254, 0.4); }
+        .key-btn.color-g { background-color: var(--green); color: #111111; box-shadow: 0 4px 14px rgba(5, 255, 161, 0.4); }
+        .key-btn.color-v { background-color: var(--purple); box-shadow: 0 4px 14px rgba(185, 103, 255, 0.4); }
+
+        .key-btn.action {
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+            border-radius: 20px;
+            aspect-ratio: auto;
+            width: 72px;
+            height: 72px;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            15%, 45%, 75% { transform: translateX(-8px); }
+            30%, 60%, 90% { transform: translateX(8px); }
+        }
+
+        /* --- SCREEN 2 & 3: STORYTELLING FADES --- */
+        .story-layout {
+            max-width: 650px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .story-text {
+            font-size: 1.85rem;
+            line-height: 1.55;
+            color: #ffffff;
+            font-weight: 500;
+            margin-bottom: 20px;
+            padding: 0 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+            animation: textFadeIn 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        @keyframes textFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tap-prompt {
+            position: absolute;
+            bottom: 45px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #ffffff;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            pointer-events: none;
+        }
+
+        .tap-prompt.visible {
+            opacity: 0.7;
+            transform: translateY(0);
+            animation: pulseHint 1.8s infinite ease-in-out;
+        }
+
+        @keyframes pulseHint {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+        }
+
+        /* --- SCREEN 4, 5 & 6: FRAMED IMAGE CARDS --- */
+        .img-card {
+            max-width: 90vw;
+            width: 450px;
+            height: auto;
+            max-height: 60vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
         }
 
         .img-card img, .img-card svg {
